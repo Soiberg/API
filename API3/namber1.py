@@ -11,10 +11,13 @@ class MapWindow(QWidget):
         self.setWindowTitle("Yandex Maps API (PyQt6)")
         self.setFixedSize(600, 450)
 
-        self.lon = 37.620070      # долгота
-        self.lat = 55.753630      # широта
-        self.zoom = 10            # масштаб (0–17)
-        self.map_type = "map"     # map | sat | skl
+        
+        self.lon = 37.620070
+        self.lat = 55.753630
+        self.zoom = 10            
+        self.min_zoom = 0         
+        self.max_zoom = 17        
+        self.map_type = "map"
 
         self.label = QLabel(self)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -31,14 +34,22 @@ class MapWindow(QWidget):
             "size": "600,450"
         }
 
-        response = requests.get(url)
         response = requests.get(url, params=params)
-
         with open("map.png", "wb") as f:
             f.write(response.content)
 
-        pixmap = QPixmap("map.png")
-        self.label.setPixmap(pixmap)
+        self.label.setPixmap(QPixmap("map.png"))
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key.Key_PageUp:
+            if self.zoom < self.max_zoom:
+                self.zoom += 1
+                self.load_map()
+
+        elif event.key() == Qt.Key.Key_PageDown:
+            if self.zoom > self.min_zoom:
+                self.zoom -= 1
+                self.load_map()
 
 
 if __name__ == "__main__":
