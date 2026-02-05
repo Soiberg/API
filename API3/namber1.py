@@ -11,7 +11,7 @@ class MapWindow(QWidget):
         self.setWindowTitle("Yandex Maps API (PyQt6)")
         self.setFixedSize(600, 450)
 
-        # === ПАРАМЕТРЫ КАРТЫ ===
+        
         self.lon = 37.620070
         self.lat = 55.753630
         self.zoom = 10
