@@ -11,10 +11,20 @@ class MapWindow(QWidget):
         self.setWindowTitle("Yandex Maps API (PyQt6)")
         self.setFixedSize(600, 450)
 
-        self.lon = 37.620070      # долгота
-        self.lat = 55.753630      # широта
-        self.zoom = 10            # масштаб (0–17)
-        self.map_type = "map"     # map | sat | skl
+        # === ПАРАМЕТРЫ КАРТЫ ===
+        self.lon = 37.620070
+        self.lat = 55.753630
+        self.zoom = 10
+
+        self.min_zoom = 0
+        self.max_zoom = 17
+
+        self.min_lon = -180
+        self.max_lon = 180
+        self.min_lat = -85
+        self.max_lat = 85
+
+        self.map_type = "map"
 
         self.label = QLabel(self)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -31,14 +41,39 @@ class MapWindow(QWidget):
             "size": "600,450"
         }
 
-        response = requests.get(url)
         response = requests.get(url, params=params)
-
         with open("map.png", "wb") as f:
             f.write(response.content)
 
-        pixmap = QPixmap("map.png")
-        self.label.setPixmap(pixmap)
+        self.label.setPixmap(QPixmap("map.png"))
+
+    def move_map(self, dx, dy):
+        self.lon = min(max(self.lon + dx, self.min_lon), self.max_lon)
+        self.lat = min(max(self.lat + dy, self.min_lat), self.max_lat)
+        self.load_map()
+
+    def keyPressEvent(self, event):
+        step = 0.5 / (2 ** self.zoom) * 100  # шаг меньше экрана
+
+        if event.key() == Qt.Key.Key_PageUp and self.zoom < self.max_zoom:
+            self.zoom += 1
+            self.load_map()
+
+        elif event.key() == Qt.Key.Key_PageDown and self.zoom > self.min_zoom:
+            self.zoom -= 1
+            self.load_map()
+
+        elif event.key() == Qt.Key.Key_Up:
+            self.move_map(0, step)
+
+        elif event.key() == Qt.Key.Key_Down:
+            self.move_map(0, -step)
+
+        elif event.key() == Qt.Key.Key_Right:
+            self.move_map(step, 0)
+
+        elif event.key() == Qt.Key.Key_Left:
+            self.move_map(-step, 0)
 
 
 if __name__ == "__main__":
